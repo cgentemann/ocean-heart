@@ -1,0 +1,229 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="https://chuck.stanford.edu/doc/images/chuck-logo2023w.png" type="image/png">
+    <!--- include the ACE editor and webchuck -->
+    <script src="https://cdn.jsdelivr.net/gh/ccrma/webchuck-ide@main/cdn/ace/ace.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ccrma/webchuck-ide@main/cdn/ace/editor.js"></script>
+    <script type="module">
+      let l, e, t = 'script', p = /(from\s+|import\s+)['"](#[\w\-]+)['"]/g, x = 'textContent', d = document, o;
+      for (o of d.querySelectorAll(t + '[type=chuck]')) o[x] = 'export default `' + o[x] + '`', o.setAttribute('type', 'inline-module');
+      for (o of d.querySelectorAll(t + '[type=inline-module]')) l = d.createElement(t), o.id ? l.id = o.id : 0, l.type = 'module', l[x] = o[x].replace(p, (u, a, z) => (e = d.querySelector(t + z + '[type=module][src]')) ? a + `/* ${ z } */'${ e.src }'` : u), l.src = URL.createObjectURL(new Blob([l[x]], { type: 'application/java' + t })), o.replaceWith(l);//inline
+    </script>
+    <script id="chuck" type="chuck">//---------------------------------------------------------------------
+// name: depthTemp.ck
+// desc: test sonification
+//---------------------------------------------------------------------
+[ "dive" ] @=> string dataCurves[];
+DataCurve curves[0];
+//for (0 => int i; i < 1; i++) {
+for (0 => int i; i < dataCurves.size(); i++) {
+  curves << new DataCurve ( dataCurves[i], i ) ;
+}
+
+true => int running;
+now => time start;
+while ( running ) {
+  for (0 => int i; i < curves.size(); i++) {
+    curves[i].isRunning () && running => running;
+  }
+  1::ms => now;
+}
+<<< "done", (now-start)/second, "seconds" >>>;
+
+class DataCurve {
+  string dataName;
+  int myID;
+  string filename;
+  FileIO fio;
+  float index[];
+  float depth[];
+  float temp[];
+  int rows;
+  true => int running;
+  
+  fun int isRunning () {
+    return running;
+  }
+
+  fun void goSynth () {
+    SinOsc oscDepth => Envelope envDepth => dac.chan ( 0 );
+    SinOsc oscTemp => Envelope envTemp => dac.chan ( 1 );
+    envDepth.duration( 100::ms );
+    envTemp.duration( 100::ms );
+    envDepth.keyOn();
+    envTemp.keyOn();
+    for (0 => int i; i < rows; i++) { 
+      oscDepth.gain( Math.dbtorms ( 80.0 + 20.0 * depth[i] ) ); 
+      oscDepth.freq( Math.mtof ( 40.0 + 40.0 * depth[i] ) );
+      oscTemp.gain( Math.dbtorms ( 80.0 + 20.0 * temp[i] ) ); 
+      oscTemp.freq( Math.mtof ( 40.0 + 40.0 * temp[i] ) );
+      1::ms => now;
+    }
+    envDepth.keyOff();
+    envTemp.keyOff();
+    100::ms => now;
+    false => running;
+  }
+
+  fun void DataCurve (string dataName, int myID) {
+    dataName => this.dataName;
+    myID => this.myID;
+    readDataFile ();
+    fio.readLine () => string header;
+    0 => rows;
+    while (!fio.eof()) {
+      fio.readLine();
+      rows++;
+    }
+    <<< filename, "has", rows, "rows with columns of", header >>>;
+    new float [rows] @=> index;
+    new float [rows] @=> depth;
+    new float [rows] @=> temp;
+    readDataFile ();
+    fio.readLine() => header; // skip over the header
+    snarfData ();
+    normalize (depth);
+    getRange (depth);
+    normalize (temp);
+    getRange (temp);
+    spork ~ goSynth ();
+  }
+
+  fun void readDataFile () {
+    me.dir() + dataName+".csv" => string filename;
+    fio.open( filename, FileIO.READ );
+    if( !fio.good() )  {
+      <<< "couldn't open file", filename >>>;
+      me.exit();
+    } else <<< filename, "opened ok" >>>;
+  }
+
+  fun void snarfData () { 
+    for (0 => int i; i < rows; i++) { // parse each row
+      fio.readLine() => string csvLine;
+      StringTokenizer strtok; // tokenizer uses space separated values
+      csvLine.replace( ",", " " ); // so replace commas
+      strtok.set(csvLine); // hand the line to tokenizer
+      string indexString, depthString, tempString; // temporary storage
+      strtok.next( indexString ); // next token is date
+      strtok.next( depthString ); // next is value
+      strtok.next( tempString ); // next is value
+  // convert strings to float numbers and store in arrays
+      Std.atof( indexString ) => index[i];
+      Std.atof( depthString ) => depth[i];
+      Std.atof( tempString ) => temp[i];
+    }
+  }
+
+  fun void normalize ( float val[] ) {
+    getRange ( val ) @=> float maxMin[];
+    maxMin[0] - maxMin[1] => float range;
+    for (0 => int i; i < rows; i++) {
+      val[i] - maxMin[1] => float tmp;
+      ( 1.0 / range ) *=> tmp;
+      tmp => val[i];
+    }
+  }
+
+  fun float[] getRange ( float val[] ) {
+    -9999.0 => float maxVal;
+    -maxVal => float minVal;
+    float maxMin[2];
+   for (0 => int i; i < rows; i++) {
+      if (val[i] > maxVal) val[i] => maxVal;
+      if (val[i] < minVal) val[i] => minVal;
+    }
+    <<< "maxVal", maxVal, "minVal", minVal >>>;
+    maxVal => maxMin[0];
+    minVal => maxMin[1];
+    return maxMin;
+  }
+
+}
+</script>
+    <script type="inline-module">
+      import { Chuck } from 'https://cdn.jsdelivr.net/npm/webchuck/+esm';
+      import chuck from '#chuck';
+
+      const editor = newChuckEditor(document.getElementById("editor"), chuck);
+
+      const states = Object.freeze({
+        playing: 0,
+        stopped: 1
+      });
+      let status = states.stopped;
+
+      const action = document.querySelector('#action');
+      const mixer = document.querySelector('#webchuck-gui');
+      const openInIDE = document.querySelector('#openInIDE');
+
+      // Play button
+      action.addEventListener('click', async () => {
+        window.theChuck ??= await Chuck.init( [{"serverFilename":"./dive.csv","virtualFilename":"dive.csv"}] );
+        switch (status) {
+          case states.playing:
+            status = states.stopped;
+            theChuck.removeLastCode();
+            // Stop button
+            action.innerHTML = `
+              Play
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+                <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+              </svg>
+            `;
+            break;
+          case states.stopped:
+            status = states.playing;
+            theChuck.runCode(editor.getValue());
+            // Play button
+            action.innerHTML = `
+              Stop
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-stop" viewBox="0 0 16 16">
+                <path d="M3.5 5A1.5 1.5 0 0 1 5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5zM5 4.5a.5.5 0 0 0-.5.5v6a.5.5 0 0 0 .5.5h6a.5.5 0 0 0 .5-.5V5a.5.5 0 0 0-.5-.5H5z"/>
+              </svg>
+            `;
+            break;
+        }
+      });
+
+      openInIDE.addEventListener('click', () => {
+        const currURL = window.location.href; // TODO: append the code to the URL
+        window.open("https://ccrma.stanford.edu/~tzfeng/webchuck-ide", '_blank');
+      });
+
+      
+    </script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/terryzfeng/webchuck-ide@main/cdn/webchuck.css">
+    <title>depth and temp</title>
+  </head>
+
+  <body>
+    <header>
+      <h1><span id="title" style="font-weight: bold">depth and temp</span></h1>
+      <div id="author" style="font-style: italic;"></div>
+      <p id="description" style="padding-bottom: 0.5rem;"></p>
+      
+      <button id="action">
+        Play
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-play" viewBox="0 0 16 16">
+          <path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"></path>
+        </svg>
+      </button>
+      <button id="openInIDE">=&gt; <em>to WebChucK IDE</em></button>
+    </header>
+
+
+    <main>
+      <div>
+<img src="depthTemp.png" width="128" height="128">
+      </div>
+      <div class="editor-container">
+        <div id="editor" class="ace_editor ace-chuck" style="width: 100%; height: 100%;"></div>
+      </div>
+    </main>
+
+  
+
+
+</body></html>
