@@ -4,6 +4,7 @@
 larger values mean more clouds
 
 rendered in 15 MIDI channels
+(be aware that MIDI channel 8 has both creature notes and clouds)
 total length 721.601000 seconds
 
 cc# 14 channel 1 depth 
