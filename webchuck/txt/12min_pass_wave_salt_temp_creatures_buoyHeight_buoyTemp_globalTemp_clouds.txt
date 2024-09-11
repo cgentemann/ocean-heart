@@ -1,8 +1,11 @@
 12min_pass_wave_salt_temp_creatures_buoyHeight_buoyTemp_globalTemp_clouds
 
-has 19 data channels
+.csv file has 19 data channels
+looks like the cloud data in high 8 channels is wrong, ramps not clouds
+but I've converted it anyway
 
 rendered in 15 MIDI channels
+total length 721.601000 seconds
 
 cc# 14 channel 1 depth 
 cc# 14 channel 2 wave 
