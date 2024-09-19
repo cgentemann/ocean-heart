@@ -1,0 +1,30 @@
+12min_pass_v04
+
+New wave data -- this version has it sped up 4x
+
+.csv file has 19 data channels
+larger values mean more clouds
+
+rendered in 15 MIDI channels
+(be aware that MIDI channel 8 has both creature notes and clouds)
+total length 721.601000 seconds
+
+cc# 14 channel 1 depth 
+cc# 14 channel 2 wave 
+cc# 14 channel 3 salinity 
+cc# 14 channel 4 temp 
+note base kn 60 channel 5 surface life down 
+note base kn 61 channel 6 windmix life 
+note base kn 62 channel 7 midnight life 
+note base kn 63 channel 8 surface life up 
+cc# 14 channel 5 buoy_height 
+cc# 14 channel 6 buoy_temp 
+cc# 14 channel 7 global_temp 
+cc# 14 channel 8 ch0_North 
+cc# 14 channel 9 ch1_NorthEast 
+cc# 14 channel 10 ch2_East 
+cc# 14 channel 11 ch3_SouthEast 
+cc# 14 channel 12 ch4_South 
+cc# 14 channel 13 ch5_SouthWest 
+cc# 14 channel 14 ch6_West 
+cc# 14 channel 15 ch7_NorthWest
