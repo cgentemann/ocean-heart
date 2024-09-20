@@ -1,0 +1,31 @@
+12min_pass_v05
+
+rendered in 12 MIDI channels
+new MIDI channel assignments from v04
+(glitter data in .csv file is a different column from where it was in v04)
+total length 721.601000 seconds
+
+cc# 14 channel 1 depth 
+cc# 14 channel 2 pressure 
+cc# 14 channel 3 temperature 
+cc# 14 channel 4 salinity 
+cc# 14 channel 5 U_current 
+cc# 14 channel 6 V_current 
+cc# 14 channel 7 W_current 
+cc# 14 channel 8 glitter 
+cc# 14 channel 9 buoy_height 
+cc# 14 channel 10 buoy_temp 
+cc# 14 channel 11 buoy_windspeed 
+cc# 14 channel 12 seismic
+
+///////////////////////
+From:	Greg Niemeyer <niemeyer@berkeley.edu>
+To:	Chris Chafe <cc@ccrma.Stanford.EDU>
+Cc:	Warren Brown <warrenbrown@mac.com>, Lester Mendez <Lesmen@bellsouth.net>
+Subject:	Re: New dataset for Chris
+Date:	Thu, 19 Sep 2024 14:55:53 -0700
+
+The glitter included here is much better! 
+Warren and Lester: The glitter here is more modulated. It glitters more near sunset and sunrise b/c the angle of the sun is flatter. There is less glitter at noon. No moon glitter though. 
+///////////////////////
+
