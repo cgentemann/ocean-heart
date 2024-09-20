@@ -28,4 +28,19 @@ Date:	Thu, 19 Sep 2024 14:55:53 -0700
 The glitter included here is much better! 
 Warren and Lester: The glitter here is more modulated. It glitters more near sunset and sunrise b/c the angle of the sun is flatter. There is less glitter at noon. No moon glitter though. 
 ///////////////////////
+(previous v04 info)
+///////////////////////
+From:	Greg Niemeyer <niemeyer@berkeley.edu>
+To:	Chris Chafe <cc@ccrma.Stanford.EDU>, Warren Brown <warrenbrown@mac.com>, Lester Mendez <Lesmen@bellsouth.net>, Jewel Murray <jk234@mac.com>
+Subject:	New dataset for Chris
+Date:	Wed, 18 Sep 2024 17:34:11 -0700
+Here is a new dataset. It has several improvements: 
+We have dive water pressure!
+buoy data is only for sections 1 and 4
+dive data has current (U, V, W, corresponding to NS, EW, and Up/Down, I think)
+We have glitter! It also goes from 0 to 1, 1 is the brightest. It is the product of sun_elevation * windspeed. 
+Seismic data is only for section 3
+
+All data is from the same general location, the Milwaukee Trench. 
+///////////////////////
 
